@@ -11,12 +11,12 @@ When I end my day, I execute the `Logout.app` application which is a shortcut in
 - Set my Skype status to "Online"
 - Check if I have already worked today
  - If not, create a new row to database
- - If yes, asks is this one a flexitime or billable work
+ - If yes, asks is this one a flexitime or billable work and then creates a new database row
 - Opens all predefined SSH tunnels
 
 `logout_scripts`
-- Closes all SSH tunnels
+- Closes all predefined SSH tunnels
 - Set my Skype status to "Away"
-- Update database that I've stopped working today
+- Update database that I've stopped working
 
-A lot of spaghetti, but since they all do the job and no one will ever pay for these scripts I've done for myself, I hadn't had any motivation to make these scripts robust.
+A lot of spaghetti, but since they all do their job and no one will ever pay for these scripts I've done for myself, I hadn't had any motivation to make these scripts more robust.
