@@ -1,6 +1,6 @@
 Here are the scripts on my Macbook Pro I use every day at work.
 
-All of these are located in `~/Documents/Scripts`, some of the scripts (eg. `Logout.app` heavily rely on this location.
+All of these are located in `~/Documents/Scripts`, some of the scripts (eg. `Logout.app` heavily rely on this location).
 
 I have set `login_scripts` to be executed at login, in Apple menu -> System preferences -> Users & groups -> my work user (lki) -> Login items.
 When I end my day, I execute the `Logout.app` application which is a shortcut in my Dock (it has a confirm in it, so if I accidentally click on it, it wont do a thing).
