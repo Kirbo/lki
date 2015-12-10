@@ -1,0 +1,5 @@
+#!/bin/bash
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+$DIR/tunnelit_sulje
+/usr/bin/osascript $DIR/skype_status_away && $DIR/timestamp_stop

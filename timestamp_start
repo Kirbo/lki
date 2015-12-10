@@ -1,0 +1,33 @@
+#!/usr/bin/php
+<?php
+date_default_timezone_set('UTC');
+$db = new PDO('mysql:host=database_host;dbname=database_dbname;charset=utf8', 'database_username', 'database_password');
+
+$time = time();
+$today = date('Y-m-d', $time);
+
+$stmt = $db->prepare("SELECT * FROM working_hours WHERE DATE(start) = :start");
+$stmt->bindParam(':start', $today);
+$stmt->execute();
+$rows = $stmt->rowCount();
+$row = $stmt->fetchAll();
+
+if ( $rows == 0 ) {
+  $query = $db->prepare("INSERT INTO working_hours SET start=NOW())");
+  $query->execute();
+}
+else if ( $rows > 0 && $row[ $rows-1 ]['stop'] != '0000-00-00 00:00:00' ) {
+  $type = readline("Billable or Flexitime (b/F): ");
+  if ( empty($type) || strtoupper($type) == "F" ) {
+    $flexitime = 1;
+    $billable = 0;
+  }
+  else {
+    $flexitime = 0;
+    $billable = 1;
+  }
+  $query = $db->prepare("INSERT INTO working_hours SET start=NOW(), flexitime=:flexitime, billable=:billable");
+  $query->bindParam(':flexitime', $flexitime);
+  $query->bindParam(':billable', $billable);
+  $query->execute();
+}

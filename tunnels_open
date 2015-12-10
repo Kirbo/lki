@@ -1,0 +1,15 @@
+#!/bin/bash
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source $DIR/tunnels_conf
+
+echo
+lki_padding "Time started:" $(date +"%T")
+echo
+
+lki_time_start
+lki_connect
+lki_time_stop
+
+echo
+lki_padding "Time stopped:" $(date +"%T")
+echo

@@ -1,0 +1,183 @@
+#!/bin/bash
+
+lki_connect () {
+  lki_attempt
+  echo "Establishing connections:"
+
+  ERRORS=()
+
+  for i in "${!hosts[@]}"
+  do
+    if [[ $(lki_contains "${CONNECTED[@]}" "${hosts[$i]}") == "n" ]]; then
+      IFS="=" read -a array <<< "${hosts[$i]}"
+      NAME=${array[0]}
+      IP=${array[1]}
+      STATUS="Skipped"
+      PID=`ps aux | fgrep $IP | fgrep -v fgrep | awk '{print $2}'`
+      ERROR=""
+
+      printf '   %s' "$NAME "
+
+      if [ -z "$PID" ]; then
+          /usr/bin/ssh -o ConnectTimeout=$TIMEOUT -o ServerAliveInterval=$KEEPALIVESECONDS -o ServerAliveCountMax=$KEEPALIVECOUNT -f -p $PORT $HOST -L $IP -N 2>"$LOGFILE"
+          COMMAND=$?
+          if [ "$COMMAND" != "0" ]; then
+              LOG=`cat $LOGFILE`
+              rm "$LOGFILE"
+              ERROR=$(printf '  %s%*.*s%s\n' "$NAME" 0 $((PADLENGTH - ${#NAME} - 23)) "$PAD")
+              ERRORS+=("$ERROR $LOG")
+
+              STATUS="FAILED!"
+            else
+              CONNECTED+=("${hosts[$i]}")
+              PID=`ps aux | fgrep $IP | fgrep -v fgrep | awk '{print $2}'`
+              STATUS="CONNECTED, pid: $PID"
+          fi
+
+        else
+          STATUS="Already open, pid: $PID"
+      fi
+
+      lki_padding "$NAME" "$STATUS" 0
+    fi
+  done
+
+  # Echo errors, if any
+  lki_errors
+}
+
+lki_close () {
+  echo "Closing connections:"
+
+  for i in "${!hosts[@]}"
+  do
+    IFS="=" read -a array <<< "${hosts[$i]}"
+    NAME=${array[0]}
+    IP=${array[1]}
+    STATUS="Not open"
+    PID=`ps aux | fgrep $IP | fgrep -v fgrep | awk '{print $2}'`
+
+    printf '   %s' "$NAME "
+
+    if [ -n "$PID" ]; then
+        kill -9 $PID
+        STATUS="Killed, pid: $PID"
+    fi
+
+    lki_padding "$NAME" "$STATUS" 0
+
+  done
+}
+
+lki_errors () {
+  if [ "${#ERRORS[@]}" -gt 0 ]; then
+    echo
+    echo "Errors:"
+    for i in ${!ERRORS[*]}
+    do
+      echo " ${ERRORS[$i]}"
+    done
+
+    echo
+    lki_time_gone
+    lki_sleep
+    lki_connect
+  fi
+
+  if [ -f "$LOGFILE" ]; then
+    rm "$LOGFILE"
+  fi
+}
+
+lki_sleep () {
+  SECONDS=0;
+  PADLENGTH2=$(($PADLENGTH+5))
+  TEXT="Retry in:"
+  while sleep .5 && ((SECONDS <= "$SLEEP")); do
+    TIME=$(($SLEEP-SECONDS))
+    printf '\r%s%*.*s%s' "$TEXT" 0 $(($PADLENGTH2 - ${#TEXT} - ${#TIME})) "$PAD" "$TIME"
+  done
+  echo
+  echo "----"
+}
+
+lki_contains() {
+    local n=$#
+    local value=${!n}
+    for ((i=1;i < $#;i++)) {
+        if [ "${!i}" == "${value}" ]; then
+            echo "y"
+            return 0
+        fi
+    }
+    echo "n"
+    return 1
+}
+
+lki_padding() {
+  LEFTTEXT=$1
+  RIGHTTEXT=$2
+  DONTPRINTLEFT=$3
+  PADLENGTH2=$PADLENGTH
+
+  if [ -z "$DONTPRINTLEFT" ]; then
+    printf '%s' "$LEFTTEXT"
+    PADLENGTH2=$(($PADLENGTH+4))
+  fi
+  printf '%*.*s' 0 $((PADLENGTH2 - ${#LEFTTEXT} - ${#RIGHTTEXT} )) "$PAD"
+  printf '%s\n' " $RIGHTTEXT"
+}
+
+lki_time_start() {
+  STARTED=$(date +"%s")
+}
+lki_time_stop() {
+  STOPPED=$(date +"%s")
+  GONE=$(($STOPPED-$STARTED))
+  echo
+  echo "----"
+  lki_time_since_started "$GONE" 0
+}
+lki_time_gone() {
+  NOW=$(date +"%s")
+  GONE=$(($NOW-$STARTED))
+  lki_time_since_started "$GONE"
+}
+
+lki_attempt() {
+  TIMESRUNNED=$(($TIMESRUNNED+1))
+}
+
+lki_time_since_started() {
+  GONE=$1
+  ATTEMPT=$2
+
+  if [ -z "$ATTEMPT" ]; then
+    ATTEMPTTEXT="Attempt number:"
+    TIMETEXT="Time since started:"
+  else
+    echo "All connections successfully established."
+    ATTEMPTTEXT="Attempts:"
+    TIMETEXT="Duration:"
+  fi
+
+  if [ "$TIMESRUNNED" -gt "0" ]; then
+    lki_padding "$ATTEMPTTEXT" "$TIMESRUNNED"
+  fi
+
+  TEXT=$(lki_displaytime $GONE)
+  lki_padding "$TIMETEXT" "$TEXT"
+}
+
+lki_displaytime() {
+  local T=$1
+  local D=$((T/60/60/24))
+  local H=$((T/60/60%24))
+  local M=$((T/60%60))
+  local S=$((T%60))
+
+  [[ $D > 0 ]] && printf '%d d ' $D
+  [[ $H > 0 ]] && printf '%d h ' $H
+  [[ $M > 0 ]] && printf '%d min ' $M
+  printf '%d sec\n' $S
+}

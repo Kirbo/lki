@@ -1,0 +1,33 @@
+#!/bin/bash
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source $DIR/tunnels_functions
+
+# Confs
+PORT="22"
+HOST="user@example.com"
+declare -a hosts
+hosts=(
+  "Host1=22107:host1:22"
+  "Host2=22108:host2:22"
+  "Host3=22109:host3:22"
+)
+# How long will the script wait for the retry
+SLEEP=60
+# How long will the ssh try to open the connection
+TIMEOUT=30
+# Padding length for output
+PADLENGTH=40
+# Keepalive length for tunnels
+KEEPALIVESECONDS=60
+# Keepalive count
+KEEPALIVECOUNT=60
+
+
+# Global variables
+PAD=$(printf '%0.1s' " "{1..60})
+ERRORS=()
+CONNECTED=()
+STARTED=0
+STOPPED=0
+TIMESRUNNED=0
+LOGFILE="$DIR/tunnels_log"

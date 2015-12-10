@@ -1,0 +1,5 @@
+#!/bin/bash
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+$DIR/logout_scripts
+/usr/bin/osascript -e 'tell application "System Events" to log out'

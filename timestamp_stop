@@ -1,0 +1,38 @@
+#!/usr/bin/php
+<?php
+date_default_timezone_set('UTC');
+$db = new PDO('mysql:host=database_host;dbname=database_dbname;charset=utf8', 'database_username', 'database_password');
+
+$time = time();
+$today = date('Y-m-d', $time);
+$stop = '0000-00-00 00:00:00';
+$negative = false;
+
+$stmt = $db->prepare("SELECT * FROM working_hours WHERE DATE(start) = :start AND stop = :stop");
+$stmt->bindParam(':start', $today);
+$stmt->bindParam(':stop', $stop);
+$stmt->execute();
+$today = $stmt->fetch();
+
+$start = strtotime($today['start']);
+$stop = time();
+if ( $today['billable'] == 0 && $today['flexitime'] == 0 ) {
+	$difference = ($stop-$start)-(8*60*60);
+}
+else {
+	$difference = ($stop-$start);
+}
+
+$stop = date('Y-m-d H:i:s', $stop);
+
+if ( $difference < 0 ) {
+        $difference = abs($difference);
+        $negative = true;
+}
+
+$difference = ($negative == true ? '-' : '').date('H:i:s', $difference);
+
+$query = $db->prepare('UPDATE working_hours SET stop = NOW(), difference = :difference WHERE id = :id');
+$query->bindParam(':difference', $difference);
+$query->bindParam(':id', $today['id']);
+$query->execute();

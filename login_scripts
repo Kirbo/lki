@@ -1,0 +1,7 @@
+#!/bin/bash
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+/usr/bin/osascript $DIR/skype_status_online
+$DIR/timestamp_start
+$DIR/tunnelit_avaa && /usr/bin/osascript $DIR/skype_status_online
+exit
