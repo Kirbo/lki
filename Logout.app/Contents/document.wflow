@@ -63,6 +63,8 @@
 					<string>OK</string>
 					<key>displayWarning</key>
 					<false/>
+					<key>explanationText</key>
+					<string></string>
 					<key>negativeTitle</key>
 					<string>Cancel</string>
 					<key>questionText</key>
@@ -168,8 +170,6 @@
 						<string>4</string>
 					</dict>
 				</dict>
-				<key>conversionLabel</key>
-				<integer>0</integer>
 				<key>isViewVisible</key>
 				<true/>
 				<key>location</key>
@@ -352,7 +352,7 @@
 	</array>
 	<key>connectors</key>
 	<dict>
-		<key>BA9B4EAE-46A3-4BFC-9206-54508EBEF504</key>
+		<key>0EF7188C-E9AB-466B-8ED2-701447A608F7</key>
 		<dict>
 			<key>from</key>
 			<string>0F2C03C5-D5F4-44FF-A421-9D8BA0045307 - 0F2C03C5-D5F4-44FF-A421-9D8BA0045307</string>
